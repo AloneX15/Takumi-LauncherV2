@@ -327,7 +327,7 @@ PHPIniDir "C:\php"
 
 ```php
 <?php
-phpinfo( );
+phpinfo( );f
 ?>
 ```
 
