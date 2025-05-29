@@ -13,14 +13,47 @@ class Login {
         this.config = config;
         this.db = new database();
 
-        if (typeof this.config.online == 'boolean') {
-            this.config.online ? this.getMicrosoft() : this.getCrack()
-        } else if (typeof this.config.online == 'string') {
-            if (this.config.online.match(/^(http|https):\/\/[^ "]+$/)) {
-                this.getAZauth();
-            }
+        // --- Manejo de pestañas ---
+        const tabMicrosoft = document.querySelector('.tab-microsoft');
+        const tabOffline = document.querySelector('.tab-offline');
+        const tabAZauth = document.querySelector('.tab-azauth');
+        const panelMicrosoft = document.querySelector('.login-home');
+        const panelOffline = document.querySelector('.login-offline');
+        const panelAZauth = document.querySelector('.login-AZauth');
+        const panelAZauthA2F = document.querySelector('.login-AZauth-A2F');
+
+        function hideAll() {
+            panelMicrosoft.classList.remove('active');
+            panelOffline.classList.remove('active');
+            panelAZauth.classList.remove('active');
+            panelAZauthA2F.classList.remove('active');
+            tabMicrosoft.classList.remove('active');
+            tabOffline.classList.remove('active');
+            tabAZauth.classList.remove('active');
         }
-        
+
+        tabMicrosoft.addEventListener('click', () => {
+            hideAll();
+            panelMicrosoft.classList.add('active');
+            tabMicrosoft.classList.add('active');
+        });
+        tabOffline.addEventListener('click', () => {
+            hideAll();
+            panelOffline.classList.add('active');
+            tabOffline.classList.add('active');
+        });
+        tabAZauth.addEventListener('click', () => {
+            hideAll();
+            panelAZauth.classList.add('active');
+            tabAZauth.classList.add('active');
+        });
+        // --- Fin manejo de pestañas ---
+
+        // Inicializa todos los métodos de login
+        this.getMicrosoft();
+        this.getCrack();
+        this.getAZauth();
+
         document.querySelector('.cancel-home').addEventListener('click', () => {
             document.querySelector('.cancel-home').style.display = 'none'
             changePanel('settings')
@@ -28,11 +61,14 @@ class Login {
     }
 
     async getMicrosoft() {
-        console.log('Initializing Microsoft login...');
         let popupLogin = new popup();
         let loginHome = document.querySelector('.login-home');
         let microsoftBtn = document.querySelector('.connect-home');
-        loginHome.style.display = 'block';
+        // loginHome.style.display = 'block'; // Ya no es necesario, lo maneja la pestaña
+
+        // Evita listeners duplicados
+        microsoftBtn.replaceWith(microsoftBtn.cloneNode(true));
+        microsoftBtn = document.querySelector('.connect-home');
 
         microsoftBtn.addEventListener("click", () => {
             popupLogin.openPopup({
@@ -61,99 +97,103 @@ class Login {
     }
 
     async getCrack() {
-    console.log('Initializing offline login...');
-    let popupLogin = new popup();
-    let loginOffline = document.querySelector('.login-offline');
-    let emailOffline = document.querySelector('.email-offline');
-    let passwordOffline = document.querySelector('.password-offline');
-    let connectOffline = document.querySelector('.connect-offline');
-    let registerOffline = document.querySelector('.register-offline');
-    loginOffline.style.display = 'block';
+        let popupLogin = new popup();
+        let loginOffline = document.querySelector('.login-offline');
+        let emailOffline = document.querySelector('.email-offline');
+        let passwordOffline = document.querySelector('.password-offline');
+        let connectOffline = document.querySelector('.connect-offline');
+        let registerOffline = document.querySelector('.register-offline');
+        // loginOffline.style.display = 'block'; // Ya no es necesario, lo maneja la pestaña
 
-    // LOGIN
-    connectOffline.addEventListener('click', async () => {
-        if (emailOffline.value.length < 3 || passwordOffline.value.length < 3) {
-            popupLogin.openPopup({
-                title: 'Error',
-                content: 'Apodo y contraseña deben tener al menos 3 caracteres.',
-                options: true
-            });
-            return;
-        }
+        // Evita listeners duplicados
+        connectOffline.replaceWith(connectOffline.cloneNode(true));
+        registerOffline.replaceWith(registerOffline.cloneNode(true));
+        connectOffline = document.querySelector('.connect-offline');
+        registerOffline = document.querySelector('.register-offline');
 
-        // Llamada a la API de login
-        try {
-            const res = await fetch('https://TU_API/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nickname: emailOffline.value, password: passwordOffline.value })
-            });
-            const data = await res.json();
-            if (!data.success) {
+        // LOGIN
+        connectOffline.addEventListener('click', async () => {
+            if (emailOffline.value.length < 3 || passwordOffline.value.length < 3) {
                 popupLogin.openPopup({
                     title: 'Error',
-                    content: data.error || 'Usuario o contraseña incorrectos.',
+                    content: 'Apodo y contraseña deben tener al menos 3 caracteres.',
                     options: true
                 });
                 return;
             }
-            // Si login correcto, simula MojangConnect para el flujo existente
-            let MojangConnect = { name: emailOffline.value, meta: { type: 'offline' } };
-            await this.saveData(MojangConnect);
-            popupLogin.closePopup();
-        } catch (err) {
-            popupLogin.openPopup({
-                title: 'Error',
-                content: 'No se pudo conectar con el servidor.',
-                options: true
-            });
-        }
-    });
 
-    // REGISTRO
-    registerOffline.addEventListener('click', async () => {
-        if (emailOffline.value.length < 3 || passwordOffline.value.length < 3) {
-            popupLogin.openPopup({
-                title: 'Error',
-                content: 'Apodo y contraseña deben tener al menos 3 caracteres.',
-                options: true
-            });
-            return;
-        }
-
-        // Llamada a la API de registro
-        try {
-            const res = await fetch('https://TU_API/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nickname: emailOffline.value, password: passwordOffline.value })
-            });
-            const data = await res.json();
-            if (!data.success) {
+            // Llamada a la API de login
+            try {
+                const res = await fetch('http://localhost:3000/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nickname: emailOffline.value, password: passwordOffline.value })
+                });
+                const data = await res.json();
+                if (!data.success) {
+                    popupLogin.openPopup({
+                        title: 'Error',
+                        content: data.error || 'Usuario o contraseña incorrectos.',
+                        options: true
+                    });
+                    return;
+                }
+                // Si login correcto, simula MojangConnect para el flujo existente
+                let MojangConnect = { name: emailOffline.value, meta: { type: 'offline' } };
+                await this.saveData(MojangConnect);
+                popupLogin.closePopup();
+            } catch (err) {
                 popupLogin.openPopup({
                     title: 'Error',
-                    content: data.error || 'El apodo ya está registrado.',
+                    content: 'No se pudo conectar con el servidor.',
+                    options: true
+                });
+            }
+        });
+
+        // REGISTRO
+        registerOffline.addEventListener('click', async () => {
+            if (emailOffline.value.length < 3 || passwordOffline.value.length < 3) {
+                popupLogin.openPopup({
+                    title: 'Error',
+                    content: 'Apodo y contraseña deben tener al menos 3 caracteres.',
                     options: true
                 });
                 return;
             }
-            popupLogin.openPopup({
-                title: 'Éxito',
-                content: '¡Registro exitoso! Ahora puedes iniciar sesión.',
-                options: true
-            });
-        } catch (err) {
-            popupLogin.openPopup({
-                title: 'Error',
-                content: 'No se pudo conectar con el servidor.',
-                options: true
-            });
-        }
-    });
-}
+
+            // Llamada a la API de registro
+            try {
+                const res = await fetch('http://localhost:3000/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nickname: emailOffline.value, password: passwordOffline.value })
+                });
+                const data = await res.json();
+                if (!data.success) {
+                    popupLogin.openPopup({
+                        title: 'Error',
+                        content: data.error || 'El apodo ya está registrado.',
+                        options: true
+                    });
+                    return;
+                }
+                popupLogin.openPopup({
+                    title: 'Éxito',
+                    content: '¡Registro exitoso! Ahora puedes iniciar sesión.',
+                    options: true
+                });
+            } catch (err) {
+                popupLogin.openPopup({
+                    title: 'Error',
+                    content: 'No se pudo conectar con el servidor.',
+                    options: true
+                });
+            }
+        });
+    }
 
     async getAZauth() {
-        console.log('Initializing AZauth login...');
         let AZauthClient = new AZauth(this.config.online);
         let PopupLogin = new popup();
         let loginAZauth = document.querySelector('.login-AZauth');
@@ -166,7 +206,15 @@ class Login {
         let AZauthConnectBTN = document.querySelector('.connect-AZauth');
         let AZauthCancelA2F = document.querySelector('.cancel-AZauth-A2F');
 
-        loginAZauth.style.display = 'block';
+        // loginAZauth.style.display = 'block'; // Ya no es necesario, lo maneja la pestaña
+
+        // Evita listeners duplicados
+        AZauthConnectBTN.replaceWith(AZauthConnectBTN.cloneNode(true));
+        connectAZauthA2F.replaceWith(connectAZauthA2F.cloneNode(true));
+        AZauthCancelA2F.replaceWith(AZauthCancelA2F.cloneNode(true));
+        AZauthConnectBTN = document.querySelector('.connect-AZauth');
+        connectAZauthA2F = document.querySelector('.connect-AZauth-A2F');
+        AZauthCancelA2F = document.querySelector('.cancel-AZauth-A2F');
 
         AZauthConnectBTN.addEventListener('click', async () => {
             PopupLogin.openPopup({
@@ -194,13 +242,13 @@ class Login {
                 });
                 return;
             } else if (AZauthConnect.A2F) {
-                loginAZauthA2F.style.display = 'block';
-                loginAZauth.style.display = 'none';
+                loginAZauthA2F.classList.add('active');
+                loginAZauth.classList.remove('active');
                 PopupLogin.closePopup();
 
                 AZauthCancelA2F.addEventListener('click', () => {
-                    loginAZauthA2F.style.display = 'none';
-                    loginAZauth.style.display = 'block';
+                    loginAZauthA2F.classList.remove('active');
+                    loginAZauth.classList.add('active');
                 });
 
                 connectAZauthA2F.addEventListener('click', async () => {

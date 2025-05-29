@@ -1,6 +1,13 @@
 <div class="container">
+    <!-- Selector de login -->
+    <div class="login-selector">
+        <button class="tab-btn tab-microsoft active">Microsoft</button>
+        <button class="tab-btn tab-offline">No Premium</button>
+        <button class="tab-btn tab-azauth">AZauth</button>
+    </div>
+
     <!-- Microsoft / Premium Login -->
-    <div class="login-home login-tabs">
+    <div class="login-home login-tabs active">
         <div class="login-text">Inicia sesión con tu cuenta Microsoft para jugar.</div>
         <div class="login-options">
             <button class="connect connect-home">Conectar con Microsoft</button>
@@ -10,17 +17,17 @@
 
     <!-- No Premium / Offline Login -->
     <div class="login-offline login-tabs">
-    <div class="login-text">Juega sin cuenta premium (No Premium)</div>
-    <div class="input-login">
-        <input type="text" class="email email-offline" placeholder="Tu apodo" />
-        <input type="password" class="password password-offline" placeholder="Contraseña" />
+        <div class="login-text">Juega sin cuenta premium (No Premium)</div>
+        <div class="input-login">
+            <input type="text" class="email email-offline" placeholder="Tu apodo" />
+            <input type="password" class="password password-offline" placeholder="Contraseña" />
+        </div>
+        <div class="login-options">
+            <button class="connect connect-offline">Entrar</button>
+            <button class="register register-offline">Registrarse</button>
+            <button class="cancel cancel-offline" style="display: none;">Cancelar</button>
+        </div>
     </div>
-    <div class="login-options">
-        <button class="connect connect-offline">Entrar</button>
-        <button class="register register-offline">Registrarse</button>
-        <button class="cancel cancel-offline" style="display: none;">Cancelar</button>
-    </div>
-</div>
 
     <!-- AZauth Login -->
     <div class="login-AZauth login-tabs">
