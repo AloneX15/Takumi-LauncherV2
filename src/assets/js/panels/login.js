@@ -61,47 +61,96 @@ class Login {
     }
 
     async getCrack() {
-        console.log('Initializing offline login...');
-        let popupLogin = new popup();
-        let loginOffline = document.querySelector('.login-offline');
+    console.log('Initializing offline login...');
+    let popupLogin = new popup();
+    let loginOffline = document.querySelector('.login-offline');
+    let emailOffline = document.querySelector('.email-offline');
+    let passwordOffline = document.querySelector('.password-offline');
+    let connectOffline = document.querySelector('.connect-offline');
+    let registerOffline = document.querySelector('.register-offline');
+    loginOffline.style.display = 'block';
 
-        let emailOffline = document.querySelector('.email-offline');
-        let connectOffline = document.querySelector('.connect-offline');
-        loginOffline.style.display = 'block';
+    // LOGIN
+    connectOffline.addEventListener('click', async () => {
+        if (emailOffline.value.length < 3 || passwordOffline.value.length < 3) {
+            popupLogin.openPopup({
+                title: 'Error',
+                content: 'Apodo y contraseña deben tener al menos 3 caracteres.',
+                options: true
+            });
+            return;
+        }
 
-        connectOffline.addEventListener('click', async () => {
-            if (emailOffline.value.length < 3) {
+        // Llamada a la API de login
+        try {
+            const res = await fetch('https://TU_API/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nickname: emailOffline.value, password: passwordOffline.value })
+            });
+            const data = await res.json();
+            if (!data.success) {
                 popupLogin.openPopup({
                     title: 'Error',
-                    content: 'Tu apodo debe tener al menos 3 caracteres.',
+                    content: data.error || 'Usuario o contraseña incorrectos.',
                     options: true
                 });
                 return;
             }
-
-            if (emailOffline.value.match(/ /g)) {
-                popupLogin.openPopup({
-                    title: 'Error',
-                    content: 'Tu apodo no debe contener espacios.',
-                    options: true
-                });
-                return;
-            }
-
-            let MojangConnect = await Mojang.login(emailOffline.value);
-
-            if (MojangConnect.error) {
-                popupLogin.openPopup({
-                    title: 'Error',
-                    content: MojangConnect.message,
-                    options: true
-                });
-                return;
-            }
-            await this.saveData(MojangConnect)
+            // Si login correcto, simula MojangConnect para el flujo existente
+            let MojangConnect = { name: emailOffline.value, meta: { type: 'offline' } };
+            await this.saveData(MojangConnect);
             popupLogin.closePopup();
-        });
-    }
+        } catch (err) {
+            popupLogin.openPopup({
+                title: 'Error',
+                content: 'No se pudo conectar con el servidor.',
+                options: true
+            });
+        }
+    });
+
+    // REGISTRO
+    registerOffline.addEventListener('click', async () => {
+        if (emailOffline.value.length < 3 || passwordOffline.value.length < 3) {
+            popupLogin.openPopup({
+                title: 'Error',
+                content: 'Apodo y contraseña deben tener al menos 3 caracteres.',
+                options: true
+            });
+            return;
+        }
+
+        // Llamada a la API de registro
+        try {
+            const res = await fetch('https://TU_API/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nickname: emailOffline.value, password: passwordOffline.value })
+            });
+            const data = await res.json();
+            if (!data.success) {
+                popupLogin.openPopup({
+                    title: 'Error',
+                    content: data.error || 'El apodo ya está registrado.',
+                    options: true
+                });
+                return;
+            }
+            popupLogin.openPopup({
+                title: 'Éxito',
+                content: '¡Registro exitoso! Ahora puedes iniciar sesión.',
+                options: true
+            });
+        } catch (err) {
+            popupLogin.openPopup({
+                title: 'Error',
+                content: 'No se pudo conectar con el servidor.',
+                options: true
+            });
+        }
+    });
+}
 
     async getAZauth() {
         console.log('Initializing AZauth login...');
